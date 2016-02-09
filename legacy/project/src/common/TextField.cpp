@@ -1937,6 +1937,7 @@ void TextField::Layout(const Matrix &inMatrix)
          else
             advance6 = 0;
          charX += advance6*font6ToLocalX;
+		 charX += g.mFormat->letterSpacing;
 
          //printf(" Char %c (%d..%d/%d,%d) %p\n", ch, ox, x, max_x, charY, g.mFont);
          if ( !displayAsPassword && (wordWrap) && charX > max_x && line.mChars>1)
