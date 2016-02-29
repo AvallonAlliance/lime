@@ -236,6 +236,12 @@ public:
                   alpha_rect.x -= visible_pixels.x;
                   alpha_rect.y -= visible_pixels.y;
                }
+			   
+			   for(int i=0;i<4;i++)
+               {
+				   p[i].x =(int) (p[i].x + 0.5);
+				   p[i].y =(int) (p[i].y + 0.5);
+			   }
 
                int aa = 1;
                SpanRect *span = new SpanRect(alpha_rect,aa);
@@ -255,6 +261,15 @@ public:
                uvt[4] = (data.mRect.x + data.mRect.w) * bmp_scale_x;
                uvt[5] = (data.mRect.y + data.mRect.h) * bmp_scale_y;
                mFiller->SetMapping(p,uvt,2);
+			   
+			   /*printf("p[0] = %f, %f\n", p[0].x, p[0].y);
+			   printf("p[1] = %f, %f\n", p[1].x, p[1].y);
+			   printf("p[2] = %f, %f\n", p[2].x, p[2].y);
+			   printf("p[3] = %f, %f\n", p[3].x, p[3].y);
+			   
+			   printf("uvt[0, 1] = %f, %f\n", uvt[0], uvt[1]);
+			   printf("uvt[2, 3] = %f, %f\n", uvt[2], uvt[3]);
+			   printf("uvt[4, 5] = %f, %f\n", uvt[4], uvt[5]);*/
 
                // Can render straight to surface ....
                if (!offscreen_buffer)
