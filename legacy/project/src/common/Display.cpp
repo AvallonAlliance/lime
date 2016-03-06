@@ -1173,9 +1173,19 @@ void DisplayObjectContainer::Render( const RenderTarget &inTarget, const RenderS
          if (obj->pixelSnapping!=psAuto || (
              full.m00>0.99 && full.m00<1.01 && full.m01==0 &&
              full.m11>0.99 && full.m11<1.01 && full.m10==0 ) )
-         {
-            full.mtx = (int)full.mtx;
-            full.mty = (int)full.mty;
+         {			 
+			 //if(obj->getParent())
+			 {
+			//	full.mtx = ((int)(full.mtx/full.m00))*full.m00;
+			//	full.mty = ((int)(full.mty/full.m11))*full.m11;
+			 }
+			// else
+			 {
+				full.mtx = (int)(full.mtx) + 0.5;//1 * full.m00;
+				full.mty = (int)(full.mty) + 0.5;//1 * full.m00;
+			 }//*/
+			
+			//printf("full.m00 %f %f\n", full.mtx, full.mty);
          }
       }
 
@@ -1400,6 +1410,8 @@ void DisplayObjectContainer::Render( const RenderTarget &inTarget, const RenderS
 
             if (inState.mPhase==rpRender)
                obj_state->CombineColourTransform(inState,&obj->colorTransform,&col_trans);
+			   
+			//full.mtx = (int) full.mtx + 0.25;
             obj->Render(inTarget,*obj_state);
          }
 

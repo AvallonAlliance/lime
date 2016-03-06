@@ -534,7 +534,7 @@ public:
             {
                Texture *boundTexture = element.mSurface->GetTexture(this);
                element.mSurface->Bind(*this,0);
-               boundTexture->BindFlags(element.mFlags & DRAW_BMP_REPEAT,element.mFlags & DRAW_BMP_SMOOTH);
+               boundTexture->BindFlags(element.mFlags & DRAW_BMP_REPEAT,/*element.mFlags &*/ DRAW_BMP_SMOOTH);
             }
          }
 
@@ -597,7 +597,8 @@ public:
                }
          }
    
-            //printf("glDrawArrays %d : %d x %d\n", element.mPrimType, element.mFirst, element.mCount );
+            //printf("%d glDrawArrays %d :  x %d\n", e, element.mPrimType,  element.mCount );
+		//	printf("inTrans %f %f %f %f\n",  inTrans[0][0], inTrans[0][1], inTrans[0][2], inTrans[0][3]);
 
          sgDrawCount++;
          glDrawArrays(sgOpenglType[element.mPrimType], 0, element.mCount );

@@ -38,11 +38,11 @@ int Tilesheet::AllocRect(int inW,int inH,float inOx, float inOy,bool inAlphaBord
 
 	// does it fit on the current row ?
    int cx = mCurrentX;
-   if (inAlphaBorder/* && cx>0*/)
-      cx+=2;
+   if (inAlphaBorder && cx>0)
+      cx+=1;
    int cy = mCurrentY;
-   if (inAlphaBorder/* && cy>0*/)
-      cy+=2;
+   if (inAlphaBorder && cy>0)
+      cy+=1;
 	if (cx + inW <= mSheet->Width() && cy + inH < mSheet->Height())
 	{
 		tile.mRect = Rect(cx, cy, inW, inH);

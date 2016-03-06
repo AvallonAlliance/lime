@@ -473,16 +473,23 @@ public:
                   UserPoint tex_pos(point[1]);
                   UserPoint size(point[2]);
                   point += 3;
-              
-                  if (inCommands[i]&pcTile_Trans_Bit)
+				  
+				 // pos.x = (int) pos.x;
+				  //pos.y = (int) pos.y;
+				  
+				  if (inCommands[i]&pcTile_Trans_Bit)
                   {
                      UserPoint trans_x = *point++;
                      UserPoint trans_y = *point++;
 
-                     UserPoint p1(pos.x + size.x*trans_x.x,
-                                  pos.y + size.x*trans_x.y);
-                     UserPoint p2(pos.x + size.x*trans_x.x + size.y*trans_y.x,
-                                  pos.y + size.x*trans_x.y + size.y*trans_y.y );
+                     UserPoint p1(
+									pos.x + size.x*trans_x.x,
+									pos.y + size.x*trans_x.y
+								 );
+                     UserPoint p2(
+									pos.x + size.x*trans_x.x + size.y*trans_y.x,
+									pos.y + size.x*trans_x.y + size.y*trans_y.y 
+								 );
                      UserPoint p3(pos.x + size.y*trans_y.x,
                                   pos.y + size.y*trans_y.y );
 
@@ -501,33 +508,34 @@ public:
                   }
                   else
                   {
-                     *vertices = (pos);
+                     *vertices = pos; 
                      Next(vertices);
-                     *vertices = ( UserPoint(pos.x+size.x,pos.y) );
+                     *vertices = UserPoint(pos.x+size.x, pos.y);
                      Next(vertices);
-                     *vertices = ( UserPoint(pos.x+size.x,pos.y+size.y) );
+                     *vertices = UserPoint(pos.x+size.x, pos.y+size.y); 
                      Next(vertices);
-                     *vertices = (pos);
+                     *vertices = pos; 
                      Next(vertices);
-                     *vertices = ( UserPoint(pos.x+size.x,pos.y+size.y) );
+                     *vertices = UserPoint(pos.x+size.x, pos.y+size.y); 
                      Next(vertices);
-                     *vertices = ( UserPoint(pos.x,pos.y+size.y) );
+                     *vertices = UserPoint(pos.x, pos.y+size.y);
                      Next(vertices);
                   }
 
 
                   pos = tex_pos;
-                  *tex = ( mTexture->PixelToTex(pos) );
+				  //printf("tex_pos: %f, %f\n", pos.x, pos.y);
+                  *tex = mTexture->PixelToTex(pos);
                   Next(tex);
-                  *tex = ( mTexture->PixelToTex(UserPoint(pos.x+size.x,pos.y)) );
+                  *tex = mTexture->PixelToTex(UserPoint(pos.x+size.x, pos.y) );
                   Next(tex);
-                  *tex = ( mTexture->PixelToTex(UserPoint(pos.x+size.x,pos.y+size.y)) );
+                  *tex = mTexture->PixelToTex(UserPoint(pos.x+size.x, pos.y+size.y));
                   Next(tex);
-                  *tex = ( mTexture->PixelToTex(pos) );
+                  *tex = mTexture->PixelToTex(pos);
                   Next(tex);
-                  *tex = ( mTexture->PixelToTex(UserPoint(pos.x+size.x,pos.y+size.y)) );
+                  *tex = mTexture->PixelToTex(UserPoint(pos.x+size.x, pos.y+size.y));
                   Next(tex);
-                  *tex = ( mTexture->PixelToTex(UserPoint(pos.x,pos.y+size.y)) );
+                  *tex = mTexture->PixelToTex(UserPoint(pos.x, pos.y+size.y));
                   Next(tex);
 
                   if (inCommands[i]&pcTile_Col_Bit)

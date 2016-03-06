@@ -97,6 +97,7 @@ TextField::TextField(bool inInitRef) : DisplayObject(inInitRef),
    mHasCaret = false;
    screenGrid = false;
    mBlink0 = GetTimeStamp();
+   pixelSnapping = psAlways;
 }
 
 TextField::~TextField()
@@ -1459,7 +1460,7 @@ void TextField::Render( const RenderTarget &inTarget, const RenderState &inState
    {
       const Matrix &matrix = *inState.mTransform.mMatrix;
       Layout(matrix);
-
+		
       RenderState state(inState);
 
       //Rect r = mActiveRect.Rotated(mLayoutRotation).Translated(matrix.mtx,matrix.mty).RemoveBorder(2*mLayoutScaleH);
@@ -1550,6 +1551,7 @@ void TextField::Render( const RenderTarget &inTarget, const RenderState &inState
 
    if (mTilesDirty)
    {
+	  // printf("mTilesDirty!\n");
       mTilesDirty = false;
       if (mCharGroups.size()==0)
       {
@@ -1574,7 +1576,8 @@ void TextField::Render( const RenderTarget &inTarget, const RenderState &inState
 
          float white[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
          float groupColour[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
-         float trans_2x2[4] = { fontToLocal, 0.0f, 0.0f, fontToLocal };
+		 
+		 float trans_2x2[4] = { fontToLocal, 0.0f, 0.0f, fontToLocal };
          for(int g=0;g<mCharGroups.size();g++)
          {
             CharGroup &group = *mCharGroups[g];
@@ -1594,6 +1597,7 @@ void TextField::Render( const RenderTarget &inTarget, const RenderState &inState
                   {
                      int cid = group.mChar0 + c;
                      UserPoint pos = mCharPos[cid]-scroll;
+					 //printf("TextField pos %f %f scroll %f %f\n", pos.x, pos.y, scroll.x, scroll.y);
                      if (pos.x < clipRight)
                      {
                         while(line<last_line && mLines[line+1].mChar0 >= cid)
@@ -1615,10 +1619,11 @@ void TextField::Render( const RenderTarget &inTarget, const RenderState &inState
                               mTiles->beginTiles(fontSurface,!screenGrid,bmNormal);
                            }
 
-                           UserPoint p(pos.x+tile.mOx*fontToLocal,pos.y+tile.mOy*fontToLocal);
+                           UserPoint p(pos.x+tile.mOx*fontToLocal, pos.y+tile.mOy*fontToLocal);
+						   //printf("TextField p %f %f tile %f %f fontToLocal %f \n", p.x, p.y, tile.mOx, tile.mOy, fontToLocal);
                            if (screenGrid)
                            {
-                              toScreenGrid(p,matrix);
+                             // toScreenGrid(p,matrix);
                            }
 
                            double right = p.x+tile.mRect.w*fontToLocal;
@@ -1666,7 +1671,7 @@ void TextField::Render( const RenderTarget &inTarget, const RenderState &inState
 
    }
 
-   if (mTiles && !mTiles->empty())
+	if (mTiles && !mTiles->empty())
       mTiles->Render(inTarget,inState);
 
    if (caret && mCaretGfx && !mCaretGfx->empty())
@@ -1937,7 +1942,7 @@ void TextField::Layout(const Matrix &inMatrix)
          else
             advance6 = 0;
          charX += advance6*font6ToLocalX;
-		 charX += g.mFormat->letterSpacing;
+		 charX += ((int)(g.mFormat->letterSpacing/fontToLocal))*fontToLocal;
 
          //printf(" Char %c (%d..%d/%d,%d) %p\n", ch, ox, x, max_x, charY, g.mFont);
          if ( !displayAsPassword && (wordWrap) && charX > max_x && line.mChars>1)
