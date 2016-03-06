@@ -1878,6 +1878,9 @@ void TextField::Layout(const Matrix &inMatrix)
       int last_word_cid = 0;
       double last_word_x = charX;
       int last_word_line_chars = line.mChars;
+	  double letterSpacingExt = 0.0;
+	  
+	  double sp = ((int)(g.mFormat->letterSpacing/fontToLocal))*fontToLocal;		 
 
       g.UpdateMetrics(line.mMetrics);
       while(cid<g.Chars())
@@ -1886,6 +1889,7 @@ void TextField::Layout(const Matrix &inMatrix)
          if (line.mChars==0)
          {
             charX = 0;
+			letterSpacingExt = 0.0;
             line.mY0 = charY;
             line.mChar0 = char_count;
             line.mCharGroup0 = i;
@@ -1942,8 +1946,16 @@ void TextField::Layout(const Matrix &inMatrix)
          else
             advance6 = 0;
          charX += advance6*font6ToLocalX;
-		 charX += ((int)(g.mFormat->letterSpacing/fontToLocal))*fontToLocal;
+		 
+		 charX += sp;
 
+		 letterSpacingExt += g.mFormat->letterSpacing - sp;
+		 if(letterSpacingExt >= fontToLocal) 
+		 {
+			 charX+=fontToLocal;
+			 letterSpacingExt-=fontToLocal;
+		 }
+		 
          //printf(" Char %c (%d..%d/%d,%d) %p\n", ch, ox, x, max_x, charY, g.mFont);
          if ( !displayAsPassword && (wordWrap) && charX > max_x && line.mChars>1)
          {
@@ -1970,6 +1982,7 @@ void TextField::Layout(const Matrix &inMatrix)
                line.mMetrics.height += g.mFormat->leading;
             charY += line.mMetrics.height;
             charX = 0;
+			letterSpacingExt = 0.0;
             mLines.push_back(line);
             line.Clear();
             g.UpdateMetrics(line.mMetrics);
