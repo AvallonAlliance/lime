@@ -41,11 +41,11 @@ int Tilesheet::AllocRect(int inW,int inH,float inOx, float inOy,bool inAlphaBord
    if (inAlphaBorder && cx>0)
       cx+=1;
    int cy = mCurrentY;
-   if (inAlphaBorder && cy>0)
-      cy+=1;
+   //if (inAlphaBorder/* && cy>0*/)
+      cy+=2;
 	if (cx + inW <= mSheet->Width() && cy + inH < mSheet->Height())
 	{
-		tile.mRect = Rect(cx, cy, inW, inH);
+		tile.mRect = Rect(cx, cy-1, inW, inH);
 		int result = mTiles.size();
 		mTiles.push_back(tile);
 		mCurrentX = cx+inW;
