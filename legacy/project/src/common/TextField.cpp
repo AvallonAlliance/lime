@@ -2078,7 +2078,7 @@ void TextField::Layout(const Matrix &inMatrix)
                extra = GAP;
                break;
             case tfaCenter:
-               extra*=0.5;
+               extra = GAP +((int) (extra * 0.5 / fontToLocal)) * fontToLocal ;
                break;
          }
          if (extra)
