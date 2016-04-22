@@ -128,92 +128,102 @@ public:
    bool GetGlyphInfo(int inChar, int &outW, int &outH, int &outAdvance,
                            int &outOx, int &outOy)
    {
-      if (!LoadBitmap(inChar))
-         return false;
+	  try {
+		  if (!LoadBitmap(inChar))
+			 return false;
 
-      outOx = mFace->glyph->bitmap_left;
-      outOy = -mFace->glyph->bitmap_top;
-      FT_Bitmap &bitmap = mFace->glyph->bitmap;
-      outW = bitmap.width;
-      outH = bitmap.rows;
+		  outOx = mFace->glyph->bitmap_left;
+		  outOy = -mFace->glyph->bitmap_top;
+		  FT_Bitmap &bitmap = mFace->glyph->bitmap;
+		  outW = bitmap.width;
+		  outH = bitmap.rows;
 
-      if (mTransform & ffUnderline)
-      {
-         int underlineY0 = mFace->glyph->bitmap_top + getUnderlineOffset();
-         int underlineY1 = underlineY0 + getUnderlineHeight();
-         if (outH<underlineY1)
-            outH = underlineY1;
-      }
+		  if (mTransform & ffUnderline)
+		  {
+			 int underlineY0 = mFace->glyph->bitmap_top + getUnderlineOffset();
+			 int underlineY1 = underlineY0 + getUnderlineHeight();
+			 if (outH<underlineY1)
+				outH = underlineY1;
+		  }
 
-      outAdvance = (mFace->glyph->advance.x);
-      return true;
+		  outAdvance = (mFace->glyph->advance.x);
+		  return true;
+	  } catch(...) {
+		  return false;
+	  }
    }
 
 
    void RenderGlyph(int inChar,const RenderTarget &outTarget)
    {
-      if (!LoadBitmap(inChar))
-         return;
+	  try {
+		
+		  if (!LoadBitmap(inChar))
+			 return;
 
-      int underlineY0 = -1;
-      int underlineY1 = -1;
+		  int underlineY0 = -1;
+		  int underlineY1 = -1;
 
-      FT_Bitmap &bitmap = mFace->glyph->bitmap;
-      int w = bitmap.width;
-      int h = bitmap.rows;
+		  FT_Bitmap &bitmap = mFace->glyph->bitmap;
+		  int w = bitmap.width;
+		  int h = bitmap.rows;
 
 
-      if (mTransform & ffUnderline)
-      {
-         underlineY0 = mFace->glyph->bitmap_top + getUnderlineOffset();
-         underlineY1 = underlineY0 + getUnderlineHeight();
-      }
+		  if (mTransform & ffUnderline)
+		  {
+			 underlineY0 = mFace->glyph->bitmap_top + getUnderlineOffset();
+			 underlineY1 = underlineY0 + getUnderlineHeight();
+		  }
 
-      if (h<underlineY1)
-         h = underlineY1;
+		  if (h<underlineY1)
+			 h = underlineY1;
 
-      if (w>outTarget.mRect.w || h>outTarget.mRect.h)
-         return;
+		  if (w>outTarget.mRect.w || h>outTarget.mRect.h)
+			 return;
 
-      for(int r=0;r<h;r++)
-      {
-         uint8  *dest = (uint8 *)outTarget.Row(r + outTarget.mRect.y) + outTarget.mRect.x;
+		  for(int r=0;r<h;r++)
+		  {
+			 uint8  *dest = (uint8 *)outTarget.Row(r + outTarget.mRect.y) + outTarget.mRect.x;
 
-         int underline = (r>=underlineY0 && r<underlineY1) ? 0xff : 0;
+			 int underline = (r>=underlineY0 && r<underlineY1) ? 0xff : 0;
 
-         if (r<bitmap.rows)
-         {
-            unsigned char *row = bitmap.buffer + r*bitmap.pitch;
-            if (bitmap.pixel_mode == FT_PIXEL_MODE_MONO)
-            {
-               int bit = 0;
-               int data = 0;
-               for(int x=0;x<outTarget.mRect.w;x++)
-               {
-                  if (!bit)
-                  {
-                     bit = 128;
-                     data = *row++;
-                  }
-                  *dest++ =  (underline || (data & bit)) ? 0xff: 0x00;
-                  bit >>= 1;
-               }
-            }
-            else if (bitmap.pixel_mode == FT_PIXEL_MODE_GRAY)
-            {
-               for(int x=0;x<w;x++)
-                  *dest ++ = *row++ | underline;
-            }
-         }
-         else if (r>=underlineY0 && r<underlineY1)
-         {
-            memset( dest, 0xff, bitmap.pixel_mode == FT_PIXEL_MODE_MONO ? w/8 : w);
-         }
-         else
-         {
-            memset( dest, 0x00, bitmap.pixel_mode == FT_PIXEL_MODE_MONO ? w/8 : w);
-         }
-      }
+			 if (r<bitmap.rows)
+			 {
+				unsigned char *row = bitmap.buffer + r*bitmap.pitch;
+				if (bitmap.pixel_mode == FT_PIXEL_MODE_MONO)
+				{
+				   int bit = 0;
+				   int data = 0;
+				   for(int x=0;x<outTarget.mRect.w;x++)
+				   {
+					  if (!bit)
+					  {
+						 bit = 128;
+						 data = *row++;
+					  }
+					  *dest++ =  (underline || (data & bit)) ? 0xff: 0x00;
+					  bit >>= 1;
+				   }
+				}
+				else if (bitmap.pixel_mode == FT_PIXEL_MODE_GRAY)
+				{
+				   for(int x=0;x<w;x++)
+					  *dest ++ = *row++ | underline;
+				}
+			 }
+			 else if (r>=underlineY0 && r<underlineY1)
+			 {
+				memset( dest, 0xff, bitmap.pixel_mode == FT_PIXEL_MODE_MONO ? w/8 : w);
+			 }
+			 else
+			 {
+				memset( dest, 0x00, bitmap.pixel_mode == FT_PIXEL_MODE_MONO ? w/8 : w);
+			 }
+		  }
+	  } catch(...)
+	  {
+		  return;
+	  }
    }
 
 
