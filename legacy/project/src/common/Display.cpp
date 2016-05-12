@@ -184,7 +184,7 @@ void DisplayObject::CheckCacheDirty(bool inForHardware)
 
 bool DisplayObject::IsBitmapRender(bool inHardware)
 {
-   return cacheAsBitmap || blendMode!=bmNormal || NonNormalBlendChild() || filters.size() ||
+   return cacheAsBitmap || (blendMode!=bmNormal && blendMode != bmOverlay) || NonNormalBlendChild() || filters.size() ||
                                       (inHardware && mMask);
 }
 
@@ -215,6 +215,7 @@ void DisplayObject::Render( const RenderTarget &inTarget, const RenderState &inS
          state.mTransform.mScale9 = &s9;
 
          Matrix unscaled = state.mTransform.mMatrix->Mult( Matrix(1.0/scaleX,1.0/scaleY) );
+		 
          state.mTransform.mMatrix = &unscaled;
 
          hit = mGfx->Render(inTarget,state);
@@ -293,6 +294,7 @@ void DisplayObject::DirtyCache(bool inParentOnly)
 
 Matrix DisplayObject::GetFullMatrix(bool inStageScaling)
 {
+	
    if (mParent)
      return mParent->GetFullMatrix(inStageScaling).Mult(GetLocalMatrix().
                 Translated(-scrollRect.x,-scrollRect.y));
@@ -422,8 +424,9 @@ void DisplayObject::setX(double inValue)
    UpdateDecomp();
    if (x!=inValue)
    {
-      mDirtyFlags |= dirtLocalMatrix;
+      //mDirtyFlags |= dirtLocalMatrix;
       x = inValue;
+	  mLocalMatrix.mtx = x;
       DirtyCache(true);
    }
 }
@@ -434,8 +437,12 @@ void DisplayObject::setScaleX(double inValue)
    UpdateDecomp();
    if (scaleX!=inValue)
    {
-      mDirtyFlags |= dirtLocalMatrix;
+      //mDirtyFlags |= dirtLocalMatrix;
       scaleX = inValue;
+	  
+	  mLocalMatrix.m10 = sin(rotation) * inValue;
+	  mLocalMatrix.m00 = cos(rotation) * inValue;
+      
       DirtyCache();
    }
 }
@@ -462,9 +469,9 @@ void DisplayObject::setWidth(double inValue)
    if (ext0.Width()==0)
       return;
 
-   scaleX = inValue/ext0.Width();
-   scaleY = ext0.Height()==0.0 ? 1.0 : getHeight() / ext0.Height();
-   mDirtyFlags |= dirtLocalMatrix;
+   setScaleX(inValue/ext0.Width());
+   setScaleY(ext0.Height()==0.0 ? 1.0 : getHeight() / ext0.Height());
+   //mDirtyFlags |= dirtLocalMatrix;
 }
 
 double DisplayObject::getWidth()
@@ -498,9 +505,9 @@ void DisplayObject::setHeight(double inValue)
    if (ext0.Height()==0)
       return;
 
-   scaleX = ext0.Width()==0.0 ? 1.0 : getWidth() / ext0.Width();
-   scaleY = inValue/ext0.Height();
-   mDirtyFlags |= dirtLocalMatrix;
+   setScaleX(ext0.Width()==0.0 ? 1.0 : getWidth() / ext0.Width());
+   setScaleY(inValue/ext0.Height());
+   //mDirtyFlags |= dirtLocalMatrix;
 }
 
 double DisplayObject::getHeight()
@@ -535,8 +542,9 @@ void DisplayObject::setY(double inValue)
    UpdateDecomp();
    if (y!=inValue)
    {
-      mDirtyFlags |= dirtLocalMatrix;
+      //mDirtyFlags |= dirtLocalMatrix;
       y = inValue;
+	  mLocalMatrix.mty = y;
       DirtyCache(true);
    }
 }
@@ -546,8 +554,12 @@ void DisplayObject::setScaleY(double inValue)
    UpdateDecomp();
    if (scaleY!=inValue)
    {
-      mDirtyFlags |= dirtLocalMatrix;
+     // mDirtyFlags |= dirtLocalMatrix;
       scaleY = inValue;
+	  
+	  mLocalMatrix.m01 = -sin(rotation) * inValue;
+	  mLocalMatrix.m11 = cos(rotation) * inValue;
+      
       DirtyCache();
    }
 }
@@ -583,7 +595,7 @@ void DisplayObject::setScrollRect(const DRect &inRect)
 {
    scrollRect = inRect;
    UpdateDecomp();
-   mDirtyFlags |= dirtLocalMatrix;
+   //mDirtyFlags |= dirtLocalMatrix;
    DirtyCache();
 }
 
@@ -599,10 +611,13 @@ void DisplayObject::setRotation(double inValue)
 {
    UpdateDecomp();
    if (rotation!=inValue)
-   {
-      mDirtyFlags |= dirtLocalMatrix;
+   {	   
+      //mDirtyFlags |= dirtLocalMatrix;
+      double angle = inValue - getRotation();
+	  mLocalMatrix = mLocalMatrix.Rotate(-angle);
       rotation = inValue;
-      DirtyCache();
+	  
+	  DirtyCache();
    }
 }
 
@@ -646,6 +661,7 @@ void DisplayObject::setBlendMode(int inMode)
 {
    if (inMode!=blendMode)
    {
+	 //  printf("-------------------------------------------------------BlendMode %d\n", inMode);
       blendMode = (BlendMode)inMode;
       DirtyCache();
    }
@@ -1514,7 +1530,7 @@ DisplayObject *DisplayObjectContainer::getChildAt(int index)
 bool DisplayObjectContainer::NonNormalBlendChild()
 {
    for(int i=0;i<mChildren.size();i++)
-      if (mChildren[i]->visible && mChildren[i]->blendMode!=bmNormal)
+      if (mChildren[i]->visible && (mChildren[i]->blendMode!=bmNormal && mChildren[i]->blendMode != bmOverlay))
          return true;
    return false;
 }
