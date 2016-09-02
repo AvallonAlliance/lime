@@ -613,9 +613,28 @@ void DisplayObject::setRotation(double inValue)
    if (rotation!=inValue)
    {	   
       //mDirtyFlags |= dirtLocalMatrix;
-      double angle = inValue - getRotation();
-	  mLocalMatrix = mLocalMatrix.Rotate(-angle);
+      double radians = -inValue * M_PI / 180;//inValue - getRotation();
+	  double __rotationSine = sin(radians);
+	  double __rotationCosine = cos(radians);
+	  mLocalMatrix.m00 = __rotationCosine * scaleX;
+	  mLocalMatrix.m01 = __rotationSine * scaleX;
+	  mLocalMatrix.m10 = -__rotationSine * scaleY;
+	  mLocalMatrix.m11 = __rotationCosine * scaleY;
+	  //mLocalMatrix = mLocalMatrix.Rotate(-angle);
       rotation = inValue;
+	  
+	  
+	  /*var radians = __rotation * (Math.PI / 180);
+		__rotationSine = Math.sin (radians);
+		__rotationCosine = Math.cos (radians);
+		
+		var __scaleX = this.scaleX;
+		var __scaleY = this.scaleY;
+		
+		__transform.a = __rotationCosine * __scaleX;
+		__transform.b = __rotationSine * __scaleX;
+		__transform.c = -__rotationSine * __scaleY;
+		__transform.d = __rotationCosine * __scaleY;*/
 	  
 	  DirtyCache();
    }
