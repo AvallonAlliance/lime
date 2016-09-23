@@ -497,13 +497,6 @@ static std::string nmeTitle;
 
 /* Terminates the editing session */
 - (BOOL)textFieldShouldReturn:(UITextField*)_textField {
-   if (mStage->FinishEditOnEnter())
-   {
-      mStage->SetFocusObject(0);
-      [self enableKeyboard:NO];
-      return YES;
-   }
-
    // Fake a return character...
 
    Event key_down(etKeyDown);
@@ -516,6 +509,13 @@ static std::string nmeTitle;
    key_up.code = keyENTER;
    mStage->OnEvent(key_up);
  
+   if (mStage->FinishEditOnEnter())
+   {
+      mStage->SetFocusObject(0);
+      [self enableKeyboard:NO];
+      return YES;
+   }
+
    return NO;
 }
 
@@ -3411,13 +3411,6 @@ public:
 
 /* Terminates the editing session */
 - (BOOL)textFieldShouldReturn:(UITextField*)_textField {
-   if (mStage->FinishEditOnEnter())
-   {
-      mStage->SetFocusObject(0);
-      [self enableKeyboard:NO];
-      return YES;
-   }
-
    // Fake a return character...
 
    Event key_down(etKeyDown);
@@ -3430,6 +3423,13 @@ public:
    key_up.code = keyENTER;
    mStage->OnEvent(key_up);
  
+   if (mStage->FinishEditOnEnter())
+   {
+      mStage->SetFocusObject(0);
+      [self enableKeyboard:NO];
+      return YES;
+   }
+
    return NO;
 }
 
