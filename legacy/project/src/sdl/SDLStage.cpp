@@ -1333,7 +1333,7 @@ void CreateMainFrame(FrameCreationCallback inOnFrame,int inWidth,int inHeight,
 	   
    }
    #endif
-
+   sdl_flags |= SDL_WINDOW_ALLOW_HIGHDPI;
    sgSDLFrame = new SDLFrame( screen, sdl_flags, is_opengl, inWidth, inHeight );
 
    inOnFrame(sgSDLFrame);
