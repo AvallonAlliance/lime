@@ -755,13 +755,13 @@ void TextField::OnKey(Event &inEvent)
    }
    else
    {
-	   printf("key value %d\n",inEvent.value);
+	   /*printf("key value %d\n",inEvent.value);
 	   printf("key code %d\n",inEvent.code);
 	   printf("key type %d\n",inEvent.type);
-	   printf("key flags %d\n",inEvent.flags);
+	   printf("key flags %d\n",inEvent.flags);*/
 	   if(((inEvent.flags & efCtrlDown) || (inEvent.flags & efCommandDown)) && inEvent.value == 67)
 	   {
-		   printf("copy %d %d\n", mSelectMin, mSelectMax);
+		  // printf("copy %d %d\n", mSelectMin, mSelectMax);
 		   char buf[512];
 		   WString ws = getSelectedText();
 		   wcstombs(buf, ws.c_str(), wcslen(ws.c_str()));
@@ -770,7 +770,7 @@ void TextField::OnKey(Event &inEvent)
 	   }
 	   if(((inEvent.flags & efCtrlDown) || (inEvent.flags & efCommandDown)) && inEvent.value == 86)
 	   {
-		   printf("paste");
+		  // printf("paste");
 		   wchar_t buf[512];
 		   char *s = SDL_GetClipboardText ();
 		   mbstowcs(buf, s, strlen(s));
