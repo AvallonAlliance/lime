@@ -94,6 +94,7 @@ public:
    WString getHTMLText();
    void setHTMLText(const WString &inString);
    WString getText();
+   WString getSelectedText();
    void setText(const WString &inString);
 
    int   getLength() const;
@@ -148,7 +149,8 @@ public:
 
    void GetExtent(const Transform &inTrans, Extent2DF &outExt,bool inForBitmap,bool inIncludeStroke);
    Cursor GetCursor();
-   bool WantsFocus() { return isInput && mouseEnabled; }
+   bool WantsFocus() { return selectable && mouseEnabled; }
+   void Unfocus();
    bool CaptureDown(Event &inEvent);
    void Drag(Event &inEvent);
    void EndDrag(Event &inEvent);

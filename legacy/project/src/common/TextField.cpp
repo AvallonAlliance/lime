@@ -8,6 +8,7 @@
 #include <time.h>
 #include <sstream>
 #include <algorithm>
+#include <SDL.h>
 
 #ifndef iswalpha
 #define iswalpha isalpha
@@ -538,6 +539,20 @@ int TextField::getSelectionEndIndex()
    return mSelectMax;
 }
 
+void TextField::Unfocus()
+{
+	DisplayObject::Unfocus();
+	
+	if (selectable)
+      {
+         mSelectDownChar = 0;
+         mSelectMin = mSelectMax = 0;
+         mTilesDirty = true;
+         mCaretDirty = true;
+         mGfxDirty = true;
+         DirtyCache();
+      }
+}
 
 bool TextField::CaptureDown(Event &inEvent)
 {
@@ -630,8 +645,7 @@ void TextField::OnKey(Event &inEvent)
    {
       int code = inEvent.code;
       bool shift = inEvent.flags & efShiftDown;
-
-      switch(inEvent.value)
+	  switch(inEvent.value)
       {
          case keyBACKSPACE:
             if (mSelectMin<mSelectMax)
@@ -741,6 +755,31 @@ void TextField::OnKey(Event &inEvent)
    }
    else
    {
+	   printf("key value %d\n",inEvent.value);
+	   printf("key code %d\n",inEvent.code);
+	   if(inEvent.value == 67 && inEvent.code == 99)
+	   {
+		   printf("copy %d %d\n", mSelectMin, mSelectMax);
+		   char buf[512];
+		   WString ws = getSelectedText();
+		   wcstombs(buf, ws.c_str(), wcslen(ws.c_str()));
+		   buf[wcslen(ws.c_str())] = 0;
+		   SDL_SetClipboardText (buf);
+	   }
+	   if(inEvent.value == 86 && inEvent.code == 118)
+	   {
+		   printf("paste");
+		   wchar_t buf[512];
+		   char *s = SDL_GetClipboardText ();
+		   mbstowcs(buf, s, strlen(s));
+		   buf[strlen(s)] = 0;
+
+		   DeleteSelection();
+		   WString ws(buf);
+		   InsertString(ws);
+		   OnChange();
+		   ShowCaret();
+	   }	   
       if (inEvent.type==etKeyUp && inEvent.value==keySHIFT)
          mSelectKeyDown = -1;
    }
@@ -862,6 +901,24 @@ WString TextField::getText()
    WString result;
    for(int i=0;i<mCharGroups.size();i++)
       result += WString(mCharGroups[i]->mString.mPtr,mCharGroups[i]->Chars());
+   return result;
+}
+
+WString TextField::getSelectedText()
+{
+   WString result;
+   int cursor = 0;
+   for(int i=0;i<mCharGroups.size();i++)
+   {
+	  for(int j = 0; j < mCharGroups[i]->Chars(); j++)
+	  {
+		  if(cursor >= mSelectMin && cursor < mSelectMax)
+		  {
+				result += WString(mCharGroups[i]->mString.mPtr + cursor,1);
+		  }
+		  cursor++;
+	  }
+   }
    return result;
 }
 
@@ -1435,7 +1492,7 @@ void TextField::highlightRect(double x0, double y0, double w, double h)
 bool TextField::CaretOn()
 {
    Stage *s = getStage();
-   return (s && isInput && s->GetFocusObject()==this && !(( (int)((GetTimeStamp()-mBlink0)*3)) & 1));
+   return (s && selectable && s->GetFocusObject()==this && !(( (int)((GetTimeStamp()-mBlink0)*3)) & 1));
 }
 
 bool TextField::IsCacheDirty()
