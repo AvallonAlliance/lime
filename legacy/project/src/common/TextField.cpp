@@ -755,10 +755,10 @@ void TextField::OnKey(Event &inEvent)
    }
    else
    {
-	   //printf("key value %d\n",inEvent.value);
-	   //printf("key code %d\n",inEvent.code);
-	   //printf("key type %d\n",inEvent.type);
-	   //printf("key flags %d\n",inEvent.flags);
+	   printf("key value %d\n",inEvent.value);
+	   printf("key code %d\n",inEvent.code);
+	   printf("key type %d\n",inEvent.type);
+	   printf("key flags %d\n",inEvent.flags);
 	   if(((inEvent.flags & efCtrlDown) || (inEvent.flags & efCommandDown)) && inEvent.value == 67)
 	   {
 		   printf("copy %d %d\n", mSelectMin, mSelectMax);
