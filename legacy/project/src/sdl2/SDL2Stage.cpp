@@ -252,8 +252,10 @@ public:
       {
          mOpenGLContext = HardwareRenderer::CreateOpenGL(0, 0, sgIsOGL2);
          mOpenGLContext->IncRef();
-         //mOpenGLContext->SetWindowSize(inSurface->w, inSurface->h);
-         mOpenGLContext->SetWindowSize(mWidth, mHeight);
+
+         SDL_GL_GetDrawableSize(mSDLWindow, &inWidth, &inHeight);
+         mOpenGLContext->SetWindowSize(inWidth, inHeight);
+//         mOpenGLContext->GetDrawableSize(mWidth, mHeight);
          mPrimarySurface = new HardwareSurface(mOpenGLContext);
       }
       else
@@ -305,9 +307,10 @@ public:
    {
       mWidth = inWidth;
       mHeight = inHeight;
-      
+
       if (mIsOpenGL)
       {
+         SDL_GL_GetDrawableSize(mSDLWindow, &inWidth, &inHeight);
          mOpenGLContext->SetWindowSize(inWidth, inHeight);
       }
       else
@@ -355,7 +358,7 @@ public:
          {
             SDL_GetWindowPosition(mSDLWindow, &sgWindowRect.x, &sgWindowRect.y);
             SDL_GetWindowSize(mSDLWindow, &sgWindowRect.w, &sgWindowRect.h);
-            
+//            SDL_GL_GetDrawableSize(mSDLWindow, &sgWindowRect.w, &sgWindowRect.h);
             //SDL_SetWindowSize(mSDLWindow, sgDesktopWidth, sgDesktopHeight);
             
             SDL_DisplayMode mode;
@@ -554,7 +557,7 @@ public:
             if (inEvent.type == etTouchBegin)
             {   
                mDownX = inEvent.x;
-               mDownY = inEvent.y;   
+               mDownY = inEvent.y;
             }
             
             if (inEvent.type == etTouchEnd)
@@ -1123,11 +1126,21 @@ void AddCharCode(Event &key)
 }
 
 
+float GetDPI()
+{
+    int inWidht = 0;
+    int inHeight = 0;
+    SDL_GL_GetDrawableSize(sgSDLFrame->mStage->mSDLWindow, &inWidht, &inHeight);
+    return inWidht / (float) sgSDLFrame->mStage->mWidth;
+}
+
+
 std::map<int,wchar_t> sLastUnicode;
 Event textInputEvent;
 
 void ProcessEvent(SDL_Event &inEvent)
 {
+
    switch(inEvent.type)
    {
       case SDL_QUIT:
@@ -1210,7 +1223,8 @@ void ProcessEvent(SDL_Event &inEvent)
          
       }
       case SDL_MOUSEMOTION:
-      {  
+      {
+        float dpi = GetDPI();
             //default to 0
          int deltaX = 0;
          int deltaY = 0;
@@ -1222,7 +1236,7 @@ void ProcessEvent(SDL_Event &inEvent)
          }
 
             //int inValue=0, int inID=0, int inFlags=0, float inScaleX=1,float inScaleY=1, int inDeltaX=0,int inDeltaY=0
-         Event mouse(etMouseMove, inEvent.motion.x, inEvent.motion.y, 0, 0, 0, 1.0f, 1.0f, deltaX, deltaY);
+         Event mouse(etMouseMove, inEvent.motion.x * dpi, inEvent.motion.y * dpi, 0, 0, 0, 1.0f, 1.0f, deltaX, deltaY);
          #if defined(WEBOS) || defined(BLACKBERRY)
          mouse.value = inEvent.motion.which;
          mouse.flags |= efLeftDown;
@@ -1234,7 +1248,8 @@ void ProcessEvent(SDL_Event &inEvent)
       }
       case SDL_MOUSEBUTTONDOWN:
       {
-         Event mouse(etMouseDown, inEvent.button.x, inEvent.button.y, inEvent.button.button - 1);
+         float dpi = GetDPI();
+         Event mouse(etMouseDown, inEvent.button.x * dpi, inEvent.button.y * dpi, inEvent.button.button - 1);
          #if defined(WEBOS) || defined(BLACKBERRY)
          mouse.value = inEvent.motion.which;
          mouse.flags |= efLeftDown;
@@ -1246,7 +1261,8 @@ void ProcessEvent(SDL_Event &inEvent)
       }
       case SDL_MOUSEBUTTONUP:
       {
-         Event mouse(etMouseUp, inEvent.button.x, inEvent.button.y, inEvent.button.button - 1);
+         float dpi = GetDPI();
+         Event mouse(etMouseUp, inEvent.button.x * dpi, inEvent.button.y * dpi, inEvent.button.button - 1);
          #if defined(WEBOS) || defined(BLACKBERRY)
          mouse.value = inEvent.motion.which;
          #else
@@ -1558,7 +1574,7 @@ void CreateMainFrame(FrameCreationCallback inOnFrame, int inWidth, int inHeight,
          SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 2);
       }
 
-      //requestWindowFlags |= SDL_WINDOW_ALLOW_HIGHDPI;
+//      requestWindowFlags |= SDL_WINDOW_ALLOW_HIGHDPI;
    }
    
    #ifdef HX_LINUX
@@ -1581,6 +1597,7 @@ void CreateMainFrame(FrameCreationCallback inOnFrame, int inWidth, int inHeight,
          window = NULL;
       }
 
+      requestWindowFlags |= SDL_WINDOW_ALLOW_HIGHDPI;
       window = SDL_CreateWindow(inTitle, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, setWidth, setHeight, requestWindowFlags);
       
       #ifdef HX_WINDOWS
@@ -1667,7 +1684,7 @@ void CreateMainFrame(FrameCreationCallback inOnFrame, int inWidth, int inHeight,
    {
       SDL_GetWindowSize(window, &width, &height);
    }
-   
+
    sgSDLFrame = new SDLFrame(window, renderer, windowFlags, opengl, width, height);
    inOnFrame(sgSDLFrame);
    
